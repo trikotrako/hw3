@@ -71,7 +71,32 @@ class Trainer_1(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            train_result = self.train_epoch(dl_train, verbose=verbose)
+            train_loss.extend([loss.item() for loss in train_result.losses])
+            train_acc.append(train_result.accuracy)
+
+            test_result = self.test_epoch(dl_test, verbose=verbose)
+            test_loss.extend(test_result.losses)
+            test_acc.append(test_result.accuracy)
+
+            if best_acc is None or best_acc < test_acc[-1]:
+                best_acc = test_acc[-1]
+                if checkpoints is not None:
+                    torch.save(self.model, f'{checkpoints}_{int(os.times().elapsed)}.pt')
+
+            if early_stopping is not None:
+                if epoch == 0:
+                    previous_loss = torch.mean(test_result.losses).item()
+                else:
+                    current_loss = torch.mean(test_result.losses).item()
+                    if previous_loss - current_loss <= 0.01:
+                        epochs_without_improvement += 1
+                    else:
+                        epochs_without_improvement = 0
+
+                if epochs_without_improvement >= early_stopping:
+                    print(f"Stopped in epoch {epoch}")
+                    break
             # ========================
 
         return FitResult(actual_num_epochs,
