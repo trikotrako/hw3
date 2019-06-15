@@ -72,11 +72,11 @@ class Trainer_1(abc.ABC):
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
             train_result = self.train_epoch(dl_train, verbose=verbose)
-            train_loss.extend([loss.item() for loss in train_result.losses])
+            train_loss.append(torch.mean(torch.Tensor(train_result.losses)).item())
             train_acc.append(train_result.accuracy)
 
             test_result = self.test_epoch(dl_test, verbose=verbose)
-            test_loss.extend([loss.item() for loss in test_result.losses])
+            test_loss.append(torch.mean(torch.Tensor(test_result.losses)).item())
             test_acc.append(test_result.accuracy)
 
             if best_acc is None or best_acc < test_acc[-1]:
