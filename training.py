@@ -76,7 +76,7 @@ class Trainer_1(abc.ABC):
             train_acc.append(train_result.accuracy)
 
             test_result = self.test_epoch(dl_test, verbose=verbose)
-            test_loss.extend(test_result.losses)
+            test_loss.extend([loss.item() for loss in test_result.losses])
             test_acc.append(test_result.accuracy)
 
             if best_acc is None or best_acc < test_acc[-1]:
