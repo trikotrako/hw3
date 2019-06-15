@@ -95,7 +95,12 @@ class ConvClassifier(nn.Module):
         # Use only dimension-preserving 3x3 convolutions. Apply 2x2 Max
         # Pooling to reduce dimensions.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        for i, current_filter in enumerate(self.filters):
+            layers.append(nn.Conv2d(in_channels, current_filter, kernel_size=3, padding=1, stride=1))
+            layers.append(nn.ReLU())
+            if i % self.pool_every == 1:
+                layers.append(nn.MaxPool2d(2))
+            in_channels = current_filter
 
         # ========================
         seq = nn.Sequential(*layers)
@@ -110,7 +115,14 @@ class ConvClassifier(nn.Module):
         # You'll need to calculate the number of features first.
         # The last Linear layer should have an output dimension of out_classes.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        number_of_pools = len(self.filters) / self.pool_every
+
+        in_features = int(self.filters[-1] * (in_h // (2 ** number_of_pools)) * (in_w // (2 ** number_of_pools)))
+        for i, hidden_dim in enumerate(self.hidden_dims):
+            layers.append(nn.Linear(in_features, hidden_dim))
+            layers.append(nn.ReLU())
+            in_features = hidden_dim
+        layers.append(nn.Linear(in_features, self.out_classes))
         # ========================
         seq = nn.Sequential(*layers)
         return seq
@@ -120,7 +132,9 @@ class ConvClassifier(nn.Module):
         # Extract features from the input, run the classifier on them and
         # return class scores.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = self.feature_extractor.forward(x)
+        out = out.reshape(out.shape[0], -1)  # flatten output 4D tensor to 1 column vector
+        out = self.classifier.forward(out)
         # ========================
         return out
 

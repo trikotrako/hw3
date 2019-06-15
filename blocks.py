@@ -123,8 +123,8 @@ class Linear(Block):
         # You should accumulate gradients in dw and db.
         # ====== YOUR CODE: ======
         assert dout.shape[1] == self.out_features
-        self.db = torch.mm(dout.t(), torch.ones((dout.shape[0], 1)))
-        self.dw = torch.mm(dout.t(), x)
+        self.db.set_(torch.mm(dout.t(), torch.ones((dout.shape[0], 1))))
+        self.dw.set_(torch.mm(dout.t(), x))
         dx = torch.mm(dout, self.w)
         # ========================
 
