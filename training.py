@@ -84,17 +84,19 @@ class Trainer_1(abc.ABC):
                 if checkpoints is not None:
                     torch.save(self.model, f'{checkpoints}_{int(os.times().elapsed)}.pt')
 
+            print(f"early stopping: {early_stopping}")
             if early_stopping is not None:
-                import ipdb
-                ipdb.set_trace()
                 if epoch == 0:
-                    previous_loss = torch.mean(test_result.losses).item()
+                    print("echo is 0, starting to count epochs_without_improvement")
+                    previous_loss = test_loss[-1]
                 else:
-                    current_loss = torch.mean(test_result.losses).item()
+                    current_loss = test_loss[-1]
+                    print(f"test loss difference: {previous_loss - current_loss}")
                     if previous_loss - current_loss <= 0.03:
                         epochs_without_improvement += 1
                     else:
                         epochs_without_improvement = 0
+                    print(f"epochs_without_improvement: {epochs_without_improvement}")
 
                 if epochs_without_improvement >= early_stopping:
                     print(f"Stopped in epoch {epoch}")
