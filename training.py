@@ -84,15 +84,13 @@ class Trainer_1(abc.ABC):
                 if checkpoints is not None:
                     torch.save(self.model, f'{checkpoints}_{int(os.times().elapsed)}.pt')
 
-            print(f"early stopping: {early_stopping}")
             if early_stopping is not None:
                 if epoch == 0:
-                    print("echo is 0, starting to count epochs_without_improvement")
                     previous_loss = test_loss[-1]
                 else:
                     current_loss = test_loss[-1]
                     print(f"test loss difference: {previous_loss - current_loss}")
-                    if previous_loss - current_loss <= 0.03:
+                    if previous_loss - current_loss <= 0.01:
                         epochs_without_improvement += 1
                     else:
                         epochs_without_improvement = 0
