@@ -38,7 +38,7 @@ class MLP(Block):
             blocks.append(Linear(current_din, hidden_feature))
             blocks.append(ReLU() if activation.lower() == 'relu' else Sigmoid())
             current_din = hidden_feature
-        blocks.append(Linear(current_din, num_classes   ))
+        blocks.append(Linear(current_din, num_classes))
         # ========================
 
         self.sequence = Sequential(*blocks)

@@ -89,7 +89,7 @@ class Trainer_1(abc.ABC):
                     previous_loss = torch.mean(test_result.losses).item()
                 else:
                     current_loss = torch.mean(test_result.losses).item()
-                    if previous_loss - current_loss <= 0.01:
+                    if previous_loss - current_loss <= 0.03:
                         epochs_without_improvement += 1
                     else:
                         epochs_without_improvement = 0
