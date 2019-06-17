@@ -85,6 +85,8 @@ class Trainer_1(abc.ABC):
                     torch.save(self.model, f'{checkpoints}_{int(os.times().elapsed)}.pt')
 
             if early_stopping is not None:
+                import ipdb
+                ipdb.set_trace()
                 if epoch == 0:
                     previous_loss = torch.mean(test_result.losses).item()
                 else:
