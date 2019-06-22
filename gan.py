@@ -22,7 +22,20 @@ class Discriminator(nn.Module):
         # You can then use either an affine layer or another conv layer to
         # flatten the features.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        layers = []
+        in_channels, in_h, in_w, = tuple(self.in_size)
+        filters = [128, 256, 512, 1024]
+        stride = 2
+        for current_filter in filters:
+            layers.append(nn.Conv2d(in_channels, current_filter, kernel_size=5, padding=stride, stride=stride))
+            layers.append(nn.BatchNorm2d(current_filter))
+            layers.append(nn.LeakyReLU(0.2))
+            in_channels = current_filter
+
+        self.feature_extractor = nn.Sequential(*layers)
+
+        in_features = int(filters[-1] * (in_h // (stride ** len(filters))) * (in_w // (stride ** len(filters))))
+        self.classifier = nn.Sequential(nn.Linear(in_features, 1))
         # ========================
 
     def forward(self, x):
@@ -35,7 +48,10 @@ class Discriminator(nn.Module):
         # No need to apply sigmoid to obtain probability - we'll combine it
         # with the loss due to improved numerical stability.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        y = self.feature_extractor.forward(x)
+        #import ipdb;ipdb.set_trace()
+        y = y.reshape(y.shape[0], -1)  # flatten output 4D tensor to 1 column vector
+        y = self.classifier.forward(y)
         # ========================
         return y
 
@@ -56,7 +72,22 @@ class Generator(nn.Module):
         # section or implement something new.
         # You can assume a fixed image size.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        hidden_dims = [1024, 512, 256, 128]
+        self.first_feature_shape = (hidden_dims[0], featuremap_size, featuremap_size)
+        in_channels = self.first_feature_shape[0]
+        self.expander = nn.Linear(z_dim, int(torch.prod(torch.Tensor(self.first_feature_shape)).item()))
+
+        layers = []
+        stride = 2
+        for current_dim in hidden_dims[1:]:
+            layers.append(nn.ConvTranspose2d(in_channels, current_dim, kernel_size=5, stride=stride, padding=stride, output_padding=1))
+            layers.append(nn.BatchNorm2d(current_dim))
+            layers.append(nn.ReLU())
+            in_channels = current_dim
+
+        layers.append(nn.ConvTranspose2d(in_channels, out_channels, kernel_size=5, stride=stride, padding=stride, output_padding=1))
+        layers.append(nn.Tanh())
+        self.feature_decoder = nn.Sequential(*layers)
         # ========================
 
     def sample(self, n, with_grad=False):
@@ -73,7 +104,10 @@ class Generator(nn.Module):
         # Generate n latent space samples and return their reconstructions.
         # Don't use a loop.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        import contextlib
+        with torch.no_grad() if not with_grad else contextlib.nullcontext():
+            z = torch.randn((n, self.z_dim), device=device, requires_grad=with_grad)
+            samples = self.forward(z)
         # ========================
         return samples
 
@@ -87,7 +121,9 @@ class Generator(nn.Module):
         # Don't forget to make sure the output instances have the same scale
         # as the original (real) images.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        x = self.expander(z)
+        x = x.reshape((-1, *self.first_feature_shape))
+        x = self.feature_decoder(x)
         # ========================
         return x
 
@@ -111,7 +147,13 @@ def discriminator_loss_fn(y_data, y_generated, data_label=0, label_noise=0.0):
     # TODO: Implement the discriminator loss.
     # See torch's BCEWithLogitsLoss for a numerically stable implementation.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    loss_function = nn.BCEWithLogitsLoss()
+    dist = torch.distributions.uniform.Uniform(-label_noise / 2, label_noise / 2)
+    y_data_target = dist.sample(y_data.shape) + data_label
+    y_generated_target = dist.sample(y_generated.shape) + (1 - data_label)
+
+    loss_data = loss_function(y_data, y_data_target)
+    loss_generated = loss_function(y_generated, y_generated_target)
     # ========================
     return loss_data + loss_generated
 
@@ -130,7 +172,9 @@ def generator_loss_fn(y_generated, data_label=0):
     # Think about what you need to compare the input to, in order to
     # formulate the loss in terms of Binary Cross Entropy.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    loss_function = nn.BCEWithLogitsLoss()
+    y_generated_target = torch.zeros(y_generated.shape) + data_label
+    loss = loss_function(y_generated, y_generated_target)
     # ========================
     return loss
 
@@ -150,7 +194,18 @@ def train_batch(dsc_model: Discriminator, gen_model: Generator,
     # 2. Calculate discriminator loss
     # 3. Update discriminator parameters
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    dsc_optimizer.zero_grad()
+
+    N = len(x_data)
+    x_generated = gen_model.sample(N, True)
+
+    x_data_scores = dsc_model.forward(x_data)
+    x_generated_scores = dsc_model.forward(x_generated.detach())
+
+    dsc_loss = dsc_loss_fn(x_data_scores, x_generated_scores)
+    dsc_loss.backward()
+
+    dsc_optimizer.step()
     # ========================
 
     # TODO: Generator update
@@ -158,7 +213,14 @@ def train_batch(dsc_model: Discriminator, gen_model: Generator,
     # 2. Calculate generator loss
     # 3. Update generator parameters
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    gen_optimizer.zero_grad()
+
+    x_generated_scores = dsc_model.forward(x_generated)
+
+    gen_loss = gen_loss_fn(x_generated_scores)
+    gen_loss.backward()
+
+    gen_optimizer.step()
     # ========================
 
     return dsc_loss.item(), gen_loss.item()

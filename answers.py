@@ -259,7 +259,19 @@ def part6_gan_hyperparams():
     )
     # TODO: Tweak the hyperparameters to train your GAN.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    hypers = dict(
+        batch_size=32, z_dim=16,
+        data_label=1, label_noise=0.2,
+        discriminator_optimizer=dict(
+            type='SGD',  # Any name in nn.optim like SGD, Adam
+            lr=0.003,
+            # weight_decay=0.1
+        ),
+        generator_optimizer=dict(
+            type='Adam',  # Any name in nn.optim like SGD, Adam
+            lr=0.003,
+        ),
+    )
     # ========================
     return hypers
 
