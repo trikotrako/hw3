@@ -135,8 +135,8 @@ class ConvClassifier(nn.Module):
         # Extract features from the input, run the classifier on them and
         # return class scores.
         # ====== YOUR CODE: ======
-
-        while threading.active_count() > 8:
+        print(f"{str(datetime.datetime.now())}: ConvClassifier thread count: {threading.active_count()}")
+        while threading.active_count() > 4:
             print(f"{str(datetime.datetime.now())}: ConvClassifier thread count is big: {threading.active_count()}")
             time.sleep(20)
         out = self.feature_extractor.forward(x)
