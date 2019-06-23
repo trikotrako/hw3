@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import threading
+import time
+import datetime
 
 from .blocks import Block, Linear, ReLU, Sigmoid, Dropout, Sequential
 
@@ -132,6 +135,10 @@ class ConvClassifier(nn.Module):
         # Extract features from the input, run the classifier on them and
         # return class scores.
         # ====== YOUR CODE: ======
+
+        while threading.active_count() > 8:
+            print(f"{str(datetime.datetime.now())}: ConvClassifier thread count is big: {threading.active_count()}")
+            time.sleep(20)
         out = self.feature_extractor.forward(x)
         out = out.reshape(out.shape[0], -1)  # flatten output 4D tensor to 1 column vector
         out = self.classifier.forward(out)
