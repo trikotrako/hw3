@@ -519,7 +519,7 @@ class TorchTrainer(Trainer_1):
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
         self.optimizer.zero_grad()
-        x_scores = self.model(X)
+        x_scores = self.model.forward(X)
         loss = self.loss_fn(x_scores, y)
         loss.backward()
         self.optimizer.step()
