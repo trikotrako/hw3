@@ -276,7 +276,7 @@ class Trainer(abc.ABC):
             # - Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            
+
             # Self train current epoch.
             train_result = self.train_epoch(dl_train, verbose=verbose)
             train_loss.extend(train_result.losses)
@@ -472,6 +472,31 @@ class RNNTrainer(Trainer):
 
         # Note: scaling num_correct by seq_len because each sample has seq_len
         # different predictions.
+        return BatchResult(loss.item(), num_correct.item() / seq_len)
+
+    def test_batch(self, batch) -> BatchResult:
+        x, y = batch
+        x = x.to(self.device, dtype=torch.float)  # (B,S,V)
+        y = y.to(self.device, dtype=torch.long)  # (B,S)
+        seq_len = y.shape[1]
+
+        with torch.no_grad():
+            # TODO: Evaluate the RNN model on one batch of data.
+            # - Forward pass
+            # - Loss calculation
+            # - Calculate number of correct predictions
+            # ====== YOUR CODE: ======
+            y_scores_list, self.hidden_state = self.model(x, hidden_state=self.hidden_state)
+
+            # Make it work for CrossEntropy.
+            y_scores_list = torch.transpose(y_scores_list, 1, 2)
+            loss = self.loss_fn(y_scores_list, y)
+
+            y_predictions = torch.argmax(y_scores_list, dim=1)
+
+            num_correct = torch.sum(y == y_predictions)
+            # ========================
+
         return BatchResult(loss.item(), num_correct.item() / seq_len)
 
 
