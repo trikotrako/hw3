@@ -292,6 +292,7 @@ class Trainer(abc.ABC):
                 save_checkpoint = True
                 is_checkpoint_saved = True
 
+            import numpy as np
             if epoch == 0:
                 c_loss = np.mean(test_result.losses)
             else:
