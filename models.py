@@ -132,9 +132,9 @@ class ConvClassifier(nn.Module):
         # Extract features from the input, run the classifier on them and
         # return class scores.
         # ====== YOUR CODE: ======
-        out = self.feature_extractor.forward(x)
+        out = self.feature_extractor(x)
         out = out.reshape(out.shape[0], -1)  # flatten output 4D tensor to 1 column vector
-        out = self.classifier.forward(out)
+        out = self.classifier(out)
         # ========================
         return out
 
