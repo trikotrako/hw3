@@ -71,56 +71,50 @@ An equation: $e^{i\pi} -1 = 0$
 # Part 3 answers
 
 part3_q1 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+1.  The best accuracy in this experiment came from depth of L=2. We found out that really deep networks were not 
+    successful for our purpose. The size L=2, was the most reasonable and not too deep for our network from the values
+    that we were instructed to use. for L>=4, our network wasn't even trainable since it's so deep, which caused bad results. 
+    
+2.  Unfortunately, for only L=4 the network was not trainable because ot was already too deep. We think that for our case,
+    training the CIFAR-10 data, which is only 3*32*32, our network was too deep with L>=4. It probably suffered from the vanishing
+    gradient problem, where the gradients approach zero after the activation function, and thus don't propagate well. 
+    In addition, in the deeper networks the max pooling was heavily used, which is less "smart" then using stride, for
+    example, in order to reduce the parameters size. For example, with ```pools_every=2``` and L=8, the image will result
+    in 2*2 dimensions.
+    In order to solve these problems, probably using skip connections, avoid using too much max pooling would help and 
+    using bigger stride instead. 
 
 """
 
 part3_q2 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+The results are very similar for varying size of filters (K), for a fixed size of L, although K=128 performed slightly
+better for L=2, and for L=4, K=128 was the only configuration that was even trainable. This result makes since, because
+larger amount of filters generally means that more data is learnt about every pixel in the training data, but still the
+size L has much bigger effect then the filter size, because for the given sizes, 32*32, filter size of 32 or 64 should
+be good enough for good results. 
 
 """
 
 part3_q3 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+Unfortunately, all of the 4 networks were not trainable. The fact that we used 3 sizes of filter on all of our experiments,
+already increased the depth of the network, which the results of that were discussed in the previous answers.
 
 """
 
 
 part3_q4 = r"""
-**Your answer:**
+1.  We tried to add batch normalization in hope to solve the vanishing gradient problem, and dropout layers, 
+    as was suggested in the exercise, which is zeroing random parts of should help against the network learning complex 
+    details that over fit the training data.
+    in practice, those additions caused us a massive cost of efficiency and it took a really long time to
+    train the network. a noticeable result was that it looked like our network overfitted a lot. We think that it happened
+    due to the fact that we added a whole layer of 512 filters to the network, which we haven't done in the previous
+    experiments.
+    looking back, in order to improve the efficiency it would be better to run with smaller training data, increase the
+    learning rate, and using ADAM optimizer, which is known to be fast, in contrast to SGD which we used.
 
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+2.  it looks like our network did learn faster than the networks in experiment 1. We believe that with the correct
+    small modifications that we mentioned in ```1```, it's easy to reach much better results.
 """
 
 # ==============
